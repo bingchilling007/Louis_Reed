@@ -444,9 +444,7 @@
   if (playStoryBtn) {
     playStoryBtn.addEventListener('click', () => {
       storyOverlay.classList.add('hidden');
-      // Using generic search URL for channel if no specific video ID provided.
-      // Better fallback: Just embed a generic video until updated.
-      storyContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/videoseries?list=UULFxndxZk_iQ1G7b7b3v8OQ&autoplay=1&rel=0&modestbranding=1" title="Louis L. Reed - Justice In Motion" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      storyContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/4xIcK8FXsIM?autoplay=1&rel=0&modestbranding=1" title="Louis L. Reed - Justice In Motion" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     });
   }
 
