@@ -1836,6 +1836,10 @@ ul {
     gap: 2rem;
   }
 
+  .hero-bg-img {
+    object-position: 70% center;
+  }
+
   .hero-eyebrow {
     font-size: 0.65rem;
   }
@@ -1907,10 +1911,16 @@ ul {
   .hero-actions {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
+  }
+
+  .hero-actions .magnetic-wrap {
+    width: 100%;
   }
 
   .hero-actions .btn-primary,
   .hero-actions .btn-ghost {
+    width: 100%;
     text-align: center;
     justify-content: center;
   }
