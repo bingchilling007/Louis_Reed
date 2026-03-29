@@ -938,7 +938,7 @@ ul {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .work-side-grid {
@@ -1000,9 +1000,15 @@ ul {
 }
 
 /* .work-card-featured uses default .work-card styles */
+.work-card-featured {
+  display: flex;
+  flex-direction: column;
+}
 
 .work-card-featured .work-card-img-wrap {
-  height: 380px;
+  flex-grow: 1;
+  min-height: 380px;
+  height: auto;
 }
 
 .work-card-inner {
@@ -1115,6 +1121,8 @@ ul {
   padding: 2.5rem 2rem;
   transition: border-color var(--duration-fast) var(--ease),
               transform var(--duration-fast) var(--ease);
+  display: flex;
+  flex-direction: column;
 }
 
 .service-card:hover {
@@ -1236,9 +1244,10 @@ ul {
 
 .service-desc {
   font-size: 0.9rem;
-  line-height: 1.65;
+  line-height: 1.6;
   color: var(--white-70);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  flex-grow: 1;
 }
 
 .service-list {
