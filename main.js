@@ -142,11 +142,36 @@
   const formSuccess = document.getElementById("form-success");
   const submitBtn = document.getElementById("form-submit-btn");
 
+  // Inline error message element (inserted once, reused)
+  let formErrorEl = document.getElementById("form-error-msg");
+  if (!formErrorEl && form) {
+    formErrorEl = document.createElement("p");
+    formErrorEl.id = "form-error-msg";
+    formErrorEl.setAttribute("role", "alert");
+    formErrorEl.setAttribute("aria-live", "assertive");
+    formErrorEl.style.cssText =
+      "color:#ff6b6b;font-size:.875rem;margin-top:.75rem;display:none;";
+    form.appendChild(formErrorEl);
+  }
+
+  function showFormError(msg) {
+    if (!formErrorEl) return;
+    formErrorEl.textContent = msg;
+    formErrorEl.style.display = "block";
+  }
+
+  function hideFormError() {
+    if (!formErrorEl) return;
+    formErrorEl.style.display = "none";
+    formErrorEl.textContent = "";
+  }
+
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      hideFormError();
 
-      // Validate
+      // Client-side validation
       let valid = true;
       const required = form.querySelectorAll("[required]");
       required.forEach((field) => {
@@ -157,7 +182,7 @@
         }
       });
 
-      // Email validation
+      // Email format check
       const emailField = document.getElementById("form-email");
       if (
         emailField &&
@@ -174,38 +199,51 @@
         return;
       }
 
-      // Submit state
+      // Disable button while submitting
+      const originalBtnText = submitBtn.textContent;
       submitBtn.textContent = "Sending…";
       submitBtn.disabled = true;
 
-      // Encode form data for Netlify
-      const data = new FormData(form);
-      const body = new URLSearchParams(data).toString();
-
       try {
-        const response = await fetch("/", {
+        const response = await fetch("contact.php", {
           method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body,
+          body: new FormData(form),
         });
 
-        if (response.ok) {
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("Unexpected server response. Please try again.");
+        }
+
+        if (response.ok && data.success) {
+          // Success — hide form, reveal confirmation
           form.hidden = true;
           formSuccess.hidden = false;
         } else {
-          throw new Error("Server error");
+          // Server returned a validation / send error
+          throw new Error(
+            data.message ||
+              "Something went wrong. Please email lreed@louislreed.org directly."
+          );
         }
-      } catch {
-        // Fallback: show success UI anyway (Netlify form submission redirect alternative)
-        // Remove this in production and replace with proper error handling
-        form.hidden = true;
-        formSuccess.hidden = false;
+      } catch (err) {
+        showFormError(
+          err.message ||
+            "Unable to send your message. Please email lreed@louislreed.org directly."
+        );
+        submitBtn.textContent = originalBtnText;
+        submitBtn.disabled = false;
       }
     });
 
-    // Remove error class on input
+    // Clear error styling on input
     form.querySelectorAll(".form-input").forEach((input) => {
-      input.addEventListener("input", () => input.classList.remove("error"));
+      input.addEventListener("input", () => {
+        input.classList.remove("error");
+        hideFormError();
+      });
     });
   }
 
