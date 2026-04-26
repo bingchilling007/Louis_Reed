@@ -106,11 +106,6 @@
   const form = document.getElementById("contact-form");
   const formSuccess = document.getElementById("form-success");
   const submitBtn = document.getElementById("form-submit-btn");
-  const staticHostnames = [
-    "vercel.app",
-    "louislreed.org",
-    "www.louislreed.org",
-  ];
 
   let formErrorEl = document.getElementById("form-error-msg");
 
@@ -133,17 +128,6 @@
     if (!formErrorEl) return;
     formErrorEl.style.display = "none";
     formErrorEl.textContent = "";
-  }
-
-  function useStaticFormFallback() {
-    const hostname = window.location.hostname;
-
-    if (!hostname) return false;
-    if (hostname === "localhost" || hostname === "127.0.0.1") return false;
-
-    return staticHostnames.some(
-      (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
-    );
   }
 
   if (form && submitBtn) {
@@ -184,52 +168,23 @@
       submitBtn.textContent = "Sending...";
 
       try {
-        if (useStaticFormFallback()) {
-          const formData = new FormData(form);
-          const name = formData.get("name") || "";
-          const organization = formData.get("organization") || "";
-          const email = formData.get("email") || "";
-          const inquiryType = formData.get("inquiry_type") || "";
-          const message = formData.get("message") || "";
+        const response = await fetch(form.action || "contact.php", {
+          method: form.method || "POST",
+          body: new FormData(form),
+          headers: {
+            Accept: "application/json",
+          },
+        });
 
-          const subject = encodeURIComponent(
-            `New Inquiry from ${name}${organization ? ` (${organization})` : ""}`,
-          );
-          const body = encodeURIComponent(
-            [
-              `Name: ${name}`,
-              `Organization: ${organization || "-"}`,
-              `Email: ${email}`,
-              `Inquiry Type: ${inquiryType}`,
-              "",
-              "Project details:",
-              message,
-            ].join("\n"),
-          );
+        const data = await response.json();
 
-          window.location.href = `mailto:lreed@louislreed.org?subject=${subject}&body=${body}`;
-        } else {
-          const response = await fetch("contact.php", {
-            method: "POST",
-            body: new FormData(form),
-          });
-
-          const data = await response.json();
-
-          if (!response.ok || !data.success) {
-            throw new Error(
-              data.message || "Unable to send your message right now.",
-            );
-          }
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to send your message right now.");
         }
 
+        form.reset();
         form.hidden = true;
         if (formSuccess) {
-          const successMessage = formSuccess.querySelector("p");
-          if (successMessage && useStaticFormFallback()) {
-            successMessage.textContent =
-              "Your email app should open with the message draft ready to send.";
-          }
           formSuccess.hidden = false;
         }
       } catch (error) {
