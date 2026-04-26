@@ -133,6 +133,7 @@
   if (form && submitBtn) {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      event.stopPropagation();
       hideFormError();
 
       let isValid = true;
@@ -168,15 +169,25 @@
       submitBtn.textContent = "Sending...";
 
       try {
-        const response = await fetch(form.action || "contact.php", {
-          method: form.method || "POST",
+        const endpoint =
+          form.dataset.endpoint || form.getAttribute("action") || "contact.php";
+
+        const response = await fetch(endpoint, {
+          method: (form.method || "POST").toUpperCase(),
           body: new FormData(form),
           headers: {
             Accept: "application/json",
           },
         });
 
-        const data = await response.json();
+        let data = null;
+        try {
+          data = await response.json();
+        } catch (_error) {
+          throw new Error(
+            "The form endpoint did not return a valid response. Please check the server deployment for contact.php.",
+          );
+        }
 
         if (!response.ok || !data.success) {
           throw new Error(data.message || "Unable to send your message right now.");
@@ -184,6 +195,7 @@
 
         form.reset();
         form.hidden = true;
+        submitBtn.textContent = originalButtonText;
         if (formSuccess) {
           formSuccess.hidden = false;
         }
